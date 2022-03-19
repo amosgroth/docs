@@ -1,0 +1,120 @@
+To '''run Bisq on the Tails OS''', a few manual steps are required.
+
+__TOC__
+
+== Preparations ==
+
+* Configure a [https://tails.boum.org/doc/first_steps/welcome_screen/administration_password/ administration password] when installing Bisq
+* Configure [https://tails.boum.org/install/inc/steps/create_persistence.inline/index.en.html persistent storage]
+
+== Install ==
+
+{{Admonition_Warn|Tails does not persist data by default, so while following these directions will allow you to run Bisq on Tails, '''all data will be erased as soon as you reboot'''. This means you will lose your Bisq keys, wallet data, and everything else in the [[data directory]]. 
+
+Make sure to set up persistent storage to have your Bisq data persisted across sessions.}}
+
+Go to https://github.com/bisq-network/bisq/releases using your Tor Browser and download the <code>Bisq-64bit-[version].deb</code> and <code>.asc</code> files.
+
+You may have to use <code>wget</code>, because <code>curl</code> may not use Tor and could be blocked from using the internet.
+
+=== Verify your download ===
+
+* <code>wget <nowiki>https://bisq.network/pubkey/[keyid].asc</nowiki></code> should result in a file <code>[keyid].asc</code> in your working directory. See "Verification" section of [https://github.com/bisq-network/bisq/releases/latest release notes] for the exact key ID you should use (it's <code>29CDFD3B</code> as of this writing) to verify your download.
+* Import the key to gpg by <code>gpg --import [keyid].asc</code>
+* Check the signature with <code>gpg --digest-algo SHA256 --verify [yourbinaryhere]{.asc*,}</code> which should give you something like this
+<pre>
+[snip]
+gpg: Good signature from "Christoph Atteneder...
+[snip]
+</pre>
+
+=== Install Bisq ===
+
+Do a simple <code>sudo dpkg -i [yourbinaryhere]</code>.
+
+== Configure ==
+
+* Make authcookie readable:
+<pre>sudo chmod o+r /var/run/tor/control.authcookie</pre>
+
+* Configure <code>onion-grater</code>.
+
+Create a file <code>/etc/onion-grater.d/bisq.yml</code> with contents:
+
+<pre>
+---
+- apparmor-profiles:
+    - '/opt/bisq/bin/Bisq'
+  users:
+    - 'amnesia'
+  commands:
+    AUTHCHALLENGE:
+      - 'SAFECOOKIE .*'
+    SETEVENTS:
+      - 'CIRC WARN ERR'
+      - 'CIRC ORCONN INFO NOTICE WARN ERR HS_DESC HS_DESC_CONTENT'
+    GETINFO:
+      - 'net/listeners/socks'
+    ADD_ONION:
+      - pattern:     'NEW:(\S+) Port=9999,(\S+)'
+        replacement: 'NEW:{} Port=9999,{client-address}:{}'
+      - pattern:     '(\S+):(\S+) Port=9999,(\S+)'
+        replacement: '{}:{} Port=9999,{client-address}:{}'
+    DEL_ONION:
+      - '.+'
+    HSFETCH:
+      - '.+'
+  events:
+    CIRC:
+      suppress: true
+    ORCONN:
+      suppress: true
+    INFO:
+      suppress: true
+    NOTICE:
+      suppress: true
+    WARN:
+      suppress: true
+    ERR:
+      suppress: true
+    HS_DESC:
+      response:
+        - pattern:     '650 HS_DESC CREATED (\S+) (\S+) (\S+) \S+ (.+)'
+          replacement: '650 HS_DESC CREATED {} {} {} redacted {}'
+        - pattern:     '650 HS_DESC UPLOAD (\S+) (\S+) .*'
+          replacement: '650 HS_DESC UPLOAD {} {} redacted redacted'
+        - pattern:     '650 HS_DESC UPLOADED (\S+) (\S+) .+'
+          replacement: '650 HS_DESC UPLOADED {} {} redacted'
+        - pattern:     '650 HS_DESC REQUESTED (\S+) NO_AUTH'
+          replacement: '650 HS_DESC REQUESTED {} NO_AUTH'
+        - pattern:     '650 HS_DESC REQUESTED (\S+) NO_AUTH \S+ \S+'
+          replacement: '650 HS_DESC REQUESTED {} NO_AUTH redacted redacted'
+        - pattern:     '650 HS_DESC RECEIVED (\S+) NO_AUTH \S+ \S+'
+          replacement: '650 HS_DESC RECEIVED {} NO_AUTH redacted redacted'
+        - pattern:     '.*'
+          replacement: ''
+    HS_DESC_CONTENT:
+      suppress: true
+</pre>
+
+Then restart the <code>onion-grater</code> service with <code>service onion-grater restart</code>.
+
+* In <code>/usr/share/applications/Bisq.desktop</code>, replace:
+
+<pre>Exec=/opt/bisq/bin/Bisq</pre>
+
+with:
+
+<pre>Exec=/opt/bisq/bin/Bisq --torControlPort 9051 --torControlCookieFile=/var/run/tor/control.authcookie --torControlUseSafeCookieAuth</pre>
+
+== Run Bisq ==
+
+Click <code>Applications</code> > <code>Other</code> > <code>Bisq</code>.
+
+Or via terminal:
+
+<pre>
+/opt/bisq/bin/Bisq --torControlPort 9051 --torControlCookieFile=/var/run/tor/control.authcookie --torControlUseSafeCookieAuth
+</pre>
+
+[[Category:Guides]]
