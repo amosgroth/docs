@@ -5,15 +5,41 @@ __TOC__
 == Preparations ==
 
 * Configure a [https://tails.boum.org/doc/first_steps/welcome_screen/administration_password/ administration password] when installing Bisq
-* Configure [https://tails.boum.org/install/inc/steps/create_persistence.inline/index.en.html persistent storage]
-
-== Install ==
+* Configure [https://tails.boum.org/doc/first_steps/persistence/index.en.html]
+* Configure dotfiles [https://tails.boum.org/doc/first_steps/persistence/index.en.html#index13h2]
 
 {{Admonition_Warn|Tails does not persist data by default, so while following these directions will allow you to run Bisq on Tails, '''all data will be erased as soon as you reboot'''. This means you will lose your Bisq keys, wallet data, and everything else in the [[data directory]]. 
 
-Make sure to set up persistent storage to have your Bisq data persisted across sessions.}}
+Make sure to set up persistent storage and dotfiles to have your Bisq data persisted across sessions.}}
 
-Go to https://github.com/bisq-network/bisq/releases using your Tor Browser and download the <code>Bisq-64bit-[version].deb</code> and <code>.asc</code> files.
+== Data Directory ==
+
+Either you want a fresh install with a new Bisq user and data, or you had Bisq installed somewhere else and would like to keep your Bisq user and data. In both cases, start with creating the right folder structure in your dotfiles [https://tails.boum.org/doc/first_steps/persistence/index.en.html#index13h2].
+
+* Create hidden .local directory:
+<code>mkdir /live/persistence/TailsData_unlocked/dotfiles/.local</code>
+* Create share directory:
+<code>mkdir /live/persistence/TailsData_unlocked/dotfiles/.local/share</code>
+
+=== New User ===
+
+Just create an empty Bisq [[data directory]] in the dotfiles [https://tails.boum.org/doc/first_steps/persistence/index.en.html#index13h2] yourself:
+
+<code>mkdir /live/persistence/TailsData_unlocked/dotfiles/.local/share/Bisq</code>
+
+To move on with the installation [https://bisq.wiki/Running_Bisq_on_Tails#Install], you need to ''''restart Tails now'''!
+
+=== Existing User ===
+
+If you had Bisq installed somewhere else and would like to keep your Bisq user and data, simply copy your backup Bisq [[data directory]] to the dotfiles [https://tails.boum.org/doc/first_steps/persistence/index.en.html#index13h2]:
+
+<code>cp -r /[yourdirectoryhere]/Bisq /live/persistence/TailsData_unlocked/dotfiles/.local/share/Bisq</code>
+
+To move on with the installation [https://bisq.wiki/Running_Bisq_on_Tails#Install], you need to ''''restart Tails now'''!
+
+== Install ==
+
+After restarting Tails, go to https://github.com/bisq-network/bisq/releases using your Tor Browser and download the <code>Bisq-64bit-[version].deb</code> and <code>.asc</code> files.
 
 You may have to use <code>wget</code>, because <code>curl</code> may not use Tor and could be blocked from using the internet.
 
@@ -99,7 +125,7 @@ Create a file <code>/etc/onion-grater.d/bisq.yml</code> with contents:
 
 Then restart the <code>onion-grater</code> service with <code>service onion-grater restart</code>.
 
-* In <code>/usr/share/applications/Bisq.desktop</code>, replace:
+* In <code>/usr/share/applications/bisq-Bisq.desktop</code>, replace:
 
 <pre>Exec=/opt/bisq/bin/Bisq</pre>
 
@@ -115,6 +141,82 @@ Or via terminal:
 
 <pre>
 /opt/bisq/bin/Bisq --torControlPort 9051 --torControlCookieFile=/var/run/tor/control.authcookie --torControlUseSafeCookieAuth
+</pre>
+
+== Automate ==
+
+Because Tails doesn't persist Bisq for the next session, you have to repeat the installation [https://bisq.wiki/Running_Bisq_on_Tails#Install_Bisq] and configuration [https://bisq.wiki/Running_Bisq_on_Tails#Configure] after every restart. To make life easier, you can automate this in a bash script. Make sure this script is saved somewhere in the Tails persistent directory.
+
+* Create script file:
+<code>touch ~/Persistent/install-bisq.sh</code>
+* Make script executable:
+<code>chmod +x ~/Persistent/install-bisq.sh</code>
+* Edit and save file: 
+<pre>
+#!/bin/bash
+
+dpkg -i [yourbinaryhere]
+echo "Change access rights of /var/run/tor/control.authcookie ..."
+chmod o+r /var/run/tor/control.authcookie
+echo "Create /etc/onion-grater.d/bisq.yml ..."
+echo "---
+- apparmor-profiles:
+    - '/opt/bisq/bin/Bisq'
+  users:
+    - 'amnesia'
+  commands:
+    AUTHCHALLENGE:
+      - 'SAFECOOKIE .*'
+    SETEVENTS:
+      - 'CIRC WARN ERR'
+      - 'CIRC ORCONN INFO NOTICE WARN ERR HS_DESC HS_DESC_CONTENT'
+    GETINFO:
+      - 'net/listeners/socks'
+    ADD_ONION:
+      - pattern:     'NEW:(\S+) Port=9999,(\S+)'
+        replacement: 'NEW:{} Port=9999,{client-address}:{}'
+      - pattern:     '(\S+):(\S+) Port=9999,(\S+)'
+        replacement: '{}:{} Port=9999,{client-address}:{}'
+    DEL_ONION:
+      - '.+'
+    HSFETCH:
+      - '.+'
+  events:
+    CIRC:
+      suppress: true
+    ORCONN:
+      suppress: true
+    INFO:
+      suppress: true
+    NOTICE:
+      suppress: true
+    WARN:
+      suppress: true
+    ERR:
+      suppress: true
+    HS_DESC:
+      response:
+        - pattern:     '650 HS_DESC CREATED (\S+) (\S+) (\S+) \S+ (.+)'
+          replacement: '650 HS_DESC CREATED {} {} {} redacted {}'
+        - pattern:     '650 HS_DESC UPLOAD (\S+) (\S+) .*'
+          replacement: '650 HS_DESC UPLOAD {} {} redacted redacted'
+        - pattern:     '650 HS_DESC UPLOADED (\S+) (\S+) .+'
+          replacement: '650 HS_DESC UPLOADED {} {} redacted'
+        - pattern:     '650 HS_DESC REQUESTED (\S+) NO_AUTH'
+          replacement: '650 HS_DESC REQUESTED {} NO_AUTH'
+        - pattern:     '650 HS_DESC REQUESTED (\S+) NO_AUTH \S+ \S+'
+          replacement: '650 HS_DESC REQUESTED {} NO_AUTH redacted redacted'
+        - pattern:     '650 HS_DESC RECEIVED (\S+) NO_AUTH \S+ \S+'
+          replacement: '650 HS_DESC RECEIVED {} NO_AUTH redacted redacted'
+        - pattern:     '.*'
+          replacement: ''
+    HS_DESC_CONTENT:
+      suppress: true" > /etc/onion-grater.d/bisq.yml
+echo "Restart onion-grater service ..."
+service onion-grater restart
+echo "Edit Bisq executable file ..."
+sed -i 's+Exec=/opt/bisq/bin/Bisq+Exec=/opt/bisq/bin/Bisq --torControlPort 9051 --torControlCookieFile=/var/run/tor/control.authcookie --torControlUseSafeCookieAuth+' /usr/share/applications/bisq-Bisq.desktop
+echo "Bisq installed successfully."
 </pre>
 
 [[Category:Guides]]
