@@ -219,4 +219,7 @@ sed -i 's+Exec=/opt/bisq/bin/Bisq+Exec=/opt/bisq/bin/Bisq --torControlPort 9051 
 echo "Bisq installed successfully."
 </pre>
 
+Now you might run this script everytime you want to install and run Bisq after a Tails restart:
+<code>sudo ./install-bisq.sh<?code>
+
 [[Category:Guides]]
