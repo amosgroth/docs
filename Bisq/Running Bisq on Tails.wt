@@ -12,31 +12,6 @@ __TOC__
 
 Make sure to set up persistent storage and dotfiles to have your Bisq data persisted across sessions.}}
 
-== Data Directory ==
-
-Either you want a fresh install with a new Bisq user and data, or you had Bisq installed somewhere else and would like to keep your Bisq user and data. In both cases, start with creating the right folder structure in your dotfiles [https://tails.boum.org/doc/first_steps/persistence/index.en.html#index13h2].
-
-* Create hidden .local directory:
-<code>mkdir /live/persistence/TailsData_unlocked/dotfiles/.local</code>
-* Create share directory:
-<code>mkdir /live/persistence/TailsData_unlocked/dotfiles/.local/share</code>
-
-=== New User ===
-
-Just create an empty Bisq [[data directory]] in the dotfiles [https://tails.boum.org/doc/first_steps/persistence/index.en.html#index13h2] yourself:
-
-<code>mkdir /live/persistence/TailsData_unlocked/dotfiles/.local/share/Bisq</code>
-
-To move on with the installation [https://bisq.wiki/Running_Bisq_on_Tails#Install], you need to ''''restart Tails now'''!
-
-=== Existing User ===
-
-If you had Bisq installed somewhere else and would like to keep your Bisq user and data, simply copy your backup Bisq [[data directory]] to the dotfiles [https://tails.boum.org/doc/first_steps/persistence/index.en.html#index13h2]:
-
-<code>cp -r /[yourdirectoryhere]/Bisq /live/persistence/TailsData_unlocked/dotfiles/.local/share/Bisq</code>
-
-To move on with the installation [https://bisq.wiki/Running_Bisq_on_Tails#Install], you need to ''''restart Tails now'''!
-
 == Install ==
 
 After restarting Tails, go to https://github.com/bisq-network/bisq/releases using your Tor Browser and download the <code>Bisq-64bit-[version].deb</code> and <code>.asc</code> files.
@@ -143,9 +118,28 @@ Or via terminal:
 /opt/bisq/bin/Bisq --torControlPort 9051 --torControlCookieFile=/var/run/tor/control.authcookie --torControlUseSafeCookieAuth
 </pre>
 
-== Automate ==
+== Persistent Data Directory ==
 
-Because Tails doesn't persist Bisq for the next session, you have to repeat the installation [https://bisq.wiki/Running_Bisq_on_Tails#Install_Bisq] and configuration [https://bisq.wiki/Running_Bisq_on_Tails#Configure] after every restart. To make life easier, you can automate this in a bash script. Make sure this script is saved somewhere in the Tails persistent directory.
+Either you want a fresh install or you had Bisq installed somewhere else and would like to keep your Bisq user identity and data. In both cases, you need to make sure that the Bisq [[data directory]] doesn't get lost after restarting Tails.
+
+After the first start, Bisq has automatically created its [[data directory]] in the <code>~/.local/share/Bisq</code> directory and from there it gets deleted after a Tails restart.
+
+=== New User ===
+
+* Quit Bisq after the first start, once synchronisation and setup are completed
+* Move the [[data directory]] to the dotfiles [https://tails.boum.org/doc/first_steps/persistence/index.en.html#index13h2]
+<code>mv ~/.local/share/Bisq/* /live/persistence/TailsData_unlocked/dotfiles/.local/share/Bisq</code>
+* Restart Tails
+
+=== Existing User ===
+
+* Copy your backup of the Bisq [[data directory]] to the dotfiles [https://tails.boum.org/doc/first_steps/persistence/index.en.html#index13h2]
+<code>cp -r /[yourdirectoryhere]/Bisq /live/persistence/TailsData_unlocked/dotfiles/.local/share/Bisq</code>
+* Restart Tails
+
+== Installation Script ==
+
+Because Tails doesn't persist the Bisq for the next session, you have to repeat the installation [https://bisq.wiki/Running_Bisq_on_Tails#Install_Bisq] and configuration [https://bisq.wiki/Running_Bisq_on_Tails#Configure] after every restart. To make life easier, you can automate this in a bash script. Make sure this script is saved somewhere in the Tails persistent directory.
 
 * Create script file:
 <code>touch ~/Persistent/install-bisq.sh</code>
