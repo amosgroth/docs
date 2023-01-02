@@ -10,10 +10,37 @@ It is crucial to know that Umbrel and Jam don't share the same wallet. What you 
 ## Recovery with both Seeds
 This is the best case scenario. You have _both_ - your Umbrel _and_ your Jam seed phrase - at hand. To recover your Umbrel Bitcoin funds, you will need to do the following:
 * [Install Umbrel](https://github.com/getumbrel/umbrel#installing-umbrel)
-* Install Bitcoin Core from the [Umbrel App Store](https://github.com/getumbrel/umbrel#umbrel-app-store) and wait until it is 100% synched
+* Install Bitcoin Node from the [Umbrel App Store](https://github.com/getumbrel/umbrel#umbrel-app-store) and wait until it is 100% synched
 * Install Lightning Node from the App Store, let it fully synch
 * Open the Lightning Node app and [recover your Umbrel funds with your Umbrel seed phrase](https://twitter.com/umbrel/status/1562099972547690501)
 
 OK, cool. You should have recovered your old Umbrel server and wallet successfully. You should be able to see and access your funds again. If not, checkout the [Umbrel Community](https://community.getumbrel.com) where you can find more detailed instructions and support. Let's see how you can recover your Jam wallet now:
 * Install Jam from the Umbrel App Store
-* [](https://jamdocs.org/FAQ/#can-i-import-an-existing-wallet)
+* Connect to your Umbrel via SSH
+* Move into the Jam Docker container
+* Use the _wallet-tool.py_ script with your Jam seed phrase
+
+So here is an essential version of what you will need to type and see in your terminal (replace "zoo..." with your personal Jam seed phrase):
+```
+user@device  % ssh umbrel@umbrel.local
+umbrel@umbrel.local's password: 
+umbrel@umbrel:~/ $ docker exec -it jam_web_1 bash
+root@33025215bd28:/src/scripts# cd ..
+root@33025215bd28:/src# python3 scripts/wallet-tool.py recover --gap-limit=200 --recoversync
+User data location: /root/.joinmarket/
+Input mnemonic recovery phrase: zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong
+Input mnemonic extension, leave blank if there isnt one: 
+Enter new passphrase to encrypt wallet: 
+Reenter new passphrase to encrypt wallet: 
+Input wallet file name (default: wallet.jmdat): recover.jmdat
+Would you like this wallet to support fidelity bonds? write 'n' if you don't know what this is (y/n): y
+Write down this wallet recovery mnemonic
+
+zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong
+
+Recovered wallet OK
+```
+Now - when opening your Jam app on Umbrel in your browser - you should see your recovered wallet and be able to open and use it. If you don't see transactions and funds, you might have to adjust the [_--gap-limit_](https://blog.blockonomics.co/bitcoin-what-is-this-gap-limit-4f098e52d7e1) parameter with the recovery tool. Or you need to do a...
+
+## Reindex with Umbrels Bitcoin Node App
+*
