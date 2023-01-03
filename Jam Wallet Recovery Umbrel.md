@@ -62,3 +62,5 @@ umbrel@umbrel:~ $ ./umbrel/scripts/app compose bitcoin exec bitcoind bitcoin-cli
 
 ## Recovery with Jam Seed, without Umbrel Seed
 As explained above, the Umbrel wallet and Jam wallet are independent from each other. If you somehow have lost your Umbrel seed phrase, you might not be able to rescue funds from your lost Umbrel wallet - but your Jam wallet funds are safe as long as you _only have your Jam seed phrase at hand_. If you want to keep using Jam with Umbrel, you basically have to to the same as described above. The only difference will be that you will get a new and empty Umbrel wallet with a new seed phrase (write that down immediately!). You could also recover your Jam wallet without Umbrel by [installing Jam](https://jamdocs.org/software/installation/) in another environment and use the [_wallet-tool.py_](https://jamdocs.org/FAQ/#can-i-import-an-existing-wallet) script there.
+
+## Recovery without Seed(s)
