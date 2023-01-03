@@ -9,16 +9,16 @@ It is crucial to know that Umbrel and Jam don't share the same wallet. What you 
 
 ## Recovery with both Seeds
 This is the best case scenario. You have _both_ - your Umbrel _and_ your Jam seed phrase - at hand. To recover your Umbrel Bitcoin funds, you will need to do the following:
-* [Install Umbrel](https://github.com/getumbrel/umbrel#installing-umbrel)
-* Install Bitcoin Node from the [Umbrel App Store](https://github.com/getumbrel/umbrel#umbrel-app-store) and wait until it is 100% synched
-* Install Lightning Node from the App Store, let it fully synch
-* Open the Lightning Node app and [recover your Umbrel funds with your Umbrel seed phrase](https://twitter.com/umbrel/status/1562099972547690501)
+1. [Install Umbrel](https://github.com/getumbrel/umbrel#installing-umbrel)
+2. Install Bitcoin Node from the [Umbrel App Store](https://github.com/getumbrel/umbrel#umbrel-app-store) and wait until it is 100% synched
+3. Install Lightning Node from the App Store, let it fully synch
+4. Open the Lightning Node app and [recover your Umbrel funds with your Umbrel seed phrase](https://twitter.com/umbrel/status/1562099972547690501)
 
 OK, cool. You should have recovered your old Umbrel server and wallet successfully. You should be able to see and access your funds again. If not, checkout the [Umbrel Community](https://community.getumbrel.com) where you can find more detailed instructions and support. Let's see how you can recover your Jam wallet now:
-* Install Jam from the Umbrel App Store
-* Connect to your Umbrel via SSH
-* Move into the Jam Docker container
-* Use the _wallet-tool.py_ script with your Jam seed phrase
+1. Install Jam from the Umbrel App Store
+2. Connect to your Umbrel via SSH
+3. Go into the Jam Docker container
+4. Use the _wallet-tool.py_ script with your Jam seed phrase
 
 So here is an essential version of what you will need to type and see in your terminal (replace "zoo..." with your personal Jam seed phrase):
 ```
@@ -40,7 +40,12 @@ zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong
 
 Recovered wallet OK
 ```
+
 Now - when opening your Jam app on Umbrel in your browser - you should see your recovered wallet and be able to open and use it. If you don't see transactions and funds, you might have to adjust the [_--gap-limit_](https://blog.blockonomics.co/bitcoin-what-is-this-gap-limit-4f098e52d7e1) parameter with the recovery tool. Or you need to do a...
 
-## Reindex with Umbrels Bitcoin Node App
-*
+## Rescan with Umbrels Bitcoin Node App
+You probably need to [rescan](https://developer.bitcoin.org/reference/rpc/rescanblockchain.html) the blockchain on your Umbrel if you had to reinstall or resynch the Bitcoin Node before recovering your Jam wallet. This can be done with the [_bitcoin-cli_](https://bitcoin.org/en/bitcoin-core/features/user-interface#cli) on your Umbrel but can take a long time if you rescan the whole blockchain. If you know roughly when you created (and lost) your old Jam wallet that you want to recover, you can pass a start and end block height to avoid needlessly rescanning the whole blockchain. This is how you do a rescan on Umbrel:
+1. Connect to your Umbrel via SSH
+2. Find the specific block height(s)
+3. Rescan the blockchain
+
