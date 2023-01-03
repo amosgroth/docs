@@ -18,7 +18,7 @@ OK, cool. You should have recovered your old Umbrel server and wallet successful
 1. Install Jam from the Umbrel App Store
 2. Connect to your Umbrel via SSH
 3. Go into the Jam Docker container
-4. Use the _wallet-tool.py_ script with your Jam seed phrase
+4. Use the [_wallet-tool.py_](https://jamdocs.org/FAQ/#can-i-import-an-existing-wallet) script with your Jam seed phrase
 
 So here is an essential version of what you will need to type and see in your terminal (replace "zoo..." with your personal Jam seed phrase):
 ```
@@ -46,6 +46,6 @@ Now - when opening your Jam app on Umbrel in your browser - you should see your 
 ## Rescan with Umbrels Bitcoin Node App
 You probably need to [rescan](https://developer.bitcoin.org/reference/rpc/rescanblockchain.html) the blockchain on your Umbrel if you had to reinstall or resynch the Bitcoin Node before recovering your Jam wallet. This can be done with the [_bitcoin-cli_](https://bitcoin.org/en/bitcoin-core/features/user-interface#cli) on your Umbrel but can take a long time if you rescan the whole blockchain. If you know roughly when you created (and lost) your old Jam wallet that you want to recover, you can pass a start and end block height to avoid needlessly rescanning the whole blockchain. This is how you do a rescan on Umbrel:
 1. Connect to your Umbrel via SSH
-2. Find the specific block height(s)
+2. Find the specific [block height(s) by time](https://timeinblocks.com)
 3. Rescan the blockchain
 
